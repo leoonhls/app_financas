@@ -33,6 +33,9 @@ class MainPage extends GetView<MainController> {
                 CustomNavigationBarItem(
                   icon: const Icon(Icons.calendar_month),
                 ),
+                CustomNavigationBarItem(
+                  icon: const Icon(Icons.settings),
+                ),
               ],
               currentIndex: controller.indiceCliente.value,
               onTap: controller.clienteMenuTapped,
@@ -40,6 +43,8 @@ class MainPage extends GetView<MainController> {
             ),
           ),
           appBar: AppBar(
+            centerTitle: true,
+
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             title: const Padding(
               padding: EdgeInsets.only(top: 17.0),
@@ -47,21 +52,10 @@ class MainPage extends GetView<MainController> {
                   style: TextStyle(
                       fontFamily: "Josefin Sans",
                       fontWeight: FontWeight.bold,
-                  fontSize: 25)),
+                      fontSize: 25)),
             ),
           ),
-          body: Stack(
-            children: [
-              Container(
-                height: 110,
-                decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.inversePrimary,
-                    borderRadius:
-                        const BorderRadius.vertical(bottom: Radius.circular(25))),
-              ),
-              Obx(() => controller.clienteTela()),
-            ],
-          ),
+          body: controller.clienteTela(),
         ),
       ),
     );

@@ -1,13 +1,17 @@
 import 'package:app_financas2/Utils/formatador.dart';
 import 'package:app_financas2/main.dart';
+import 'package:app_financas2/pages/config_page.dart';
 import 'package:app_financas2/pages/lancamentos_geral_page.dart';
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:time_machine/time_machine.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import '../objetcs/cartao.dart';
 import '../objetcs/lancamento.dart';
 import '../pages/lancamentos_mes_page.dart';
 
@@ -17,14 +21,14 @@ class MainController extends GetxController {
   RxInt maisPraFrente =
       lancamentosBox.isEmpty ? 1.obs : RxInt(lancamentosBox.values.first.data);
   RxInt diferencaMeses = 0.obs;
-  RxDouble valorMesAtual = 0.0.obs;
+  RxDouble faturaMesAtual = 0.0.obs;
   RxDouble saldoMesAtual = 0.0.obs;
+  RxBool mostraBottomAppbar = true.obs;
 
   var indiceCliente = 0.obs;
-  late Rx<Widget> clienteTela;
+  Rx<Widget> clienteTela = const LancamentosGeralPage().obs;
   RxList<Widget> widgetsCliente = <Widget>[].obs;
   RxInt indexMesSelecionado = 0.obs;
-  RxDouble valorLimiteUtilizado = 0.0.obs;
 
   Rx<DateTime> dataComparacaoSelecionada =
       DateTime(DateTime.now().year, DateTime.now().month).obs;
@@ -32,103 +36,21 @@ class MainController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    calculaMesAtual();
-    calculaLimiteTotalUtilizado();
     widgetsCliente.value = [
       const LancamentosGeralPage(),
       const LancamentosMesPage(),
+      const ConfigPage(),
     ];
 
     clienteTela = widgetsCliente[0].obs;
     initializeDateFormatting();
   }
 
-  atualizaTudo() {
-    calculaMesAtual();
-    calculaLimiteTotalUtilizado();
-  }
+  atualizaTudo() {}
 
   Future<void> clienteMenuTapped(int index) async {
     indiceCliente.value = index;
     clienteTela.value = widgetsCliente.elementAt(indiceCliente.value);
-  }
-
-  calculaLimiteTotalUtilizado() {
-    if (lancamentosBox.isEmpty) {
-      valorLimiteUtilizado.value = 0.0;
-      return false;
-    }
-
-    double valor = 0;
-    for (Lancamento x in lancamentosBox.values) {
-      if (DateTime(
-                  LocalDate.dateTime(
-                          DateTime.fromMillisecondsSinceEpoch(x.data))
-                      .addMonths(x.parcelas)
-                      .year,
-                  LocalDate.dateTime(
-                          DateTime.fromMillisecondsSinceEpoch(x.data))
-                      .addMonths(x.parcelas)
-                      .monthOfYear,
-                  1)
-              .compareTo(DateTime(DateTime.now().year, DateTime.now().month)) >=
-          0) {
-        if (x.ganho) {
-          valor += (x.valorTotal / (x.parcelas == 0 ? 1 : x.parcelas)) *
-              LocalDate.difference(
-                LocalDate(
-                    LocalDate.dateTime(
-                            DateTime.fromMillisecondsSinceEpoch(x.data))
-                        .addMonths(x.parcelas)
-                        .year,
-                    LocalDate.dateTime(
-                            DateTime.fromMillisecondsSinceEpoch(x.data))
-                        .addMonths(x.parcelas)
-                        .monthOfYear,
-                    1),
-                LocalDate(DateTime.now().year, DateTime.now().month, 1),
-              ).months;
-        }
-      }
-    }
-
-    valorLimiteUtilizado.value = valor + valorMesAtual.value;
-  }
-
-  calculaMesAtual() {
-    valorMesAtual.value = 0.0;
-    saldoMesAtual.value = 0.0;
-    if (lancamentosBox.isEmpty) {
-      return;
-    }
-
-    for (Lancamento x in lancamentosBox.values) {
-      if (DateTime(DateTime.fromMillisecondsSinceEpoch(x.data).year,
-                      DateTime.fromMillisecondsSinceEpoch(x.data).month)
-                  .compareTo(
-                      DateTime(DateTime.now().year, DateTime.now().month)) <
-              0 &&
-          DateTime(
-                      LocalDate.dateTime(
-                              DateTime.fromMillisecondsSinceEpoch(x.data))
-                          .addMonths(x.parcelas)
-                          .year,
-                      LocalDate.dateTime(
-                              DateTime.fromMillisecondsSinceEpoch(x.data))
-                          .addMonths(x.parcelas)
-                          .monthOfYear,
-                      1)
-                  .compareTo(
-                      DateTime(DateTime.now().year, DateTime.now().month)) >=
-              0) {
-        valorMesAtual.value += x.valorTotal / x.parcelas;
-        saldoMesAtual.value -= x.valorTotal / x.parcelas;
-        if (x.ganho) {
-          saldoMesAtual.value +=
-              x.valorTotal / (x.parcelas == 0 ? 1 : x.parcelas);
-        }
-      }
-    }
   }
 
   calculaDatas() {
@@ -169,86 +91,19 @@ class MainController extends GetxController {
             .toString());
   }
 
-  /*double somaDoMesANTIGA(LocalDate mesCalc, {bool saldo = false}) {
-    double valor = 0.0;
-    if (lancamentosBox.isEmpty) return 0.0;
-    for (Lancamento x in lancamentosBox.values) {
-      if ((x.ganho
-              ? DateTime(DateTime.fromMillisecondsSinceEpoch(x.data).year, DateTime.fromMillisecondsSinceEpoch(x.data).month, 1).compareTo(DateTime(mesCalc.year, mesCalc.monthOfYear, 1)) <=
-                  0
-              : DateTime(DateTime.fromMillisecondsSinceEpoch(x.data).year, DateTime.fromMillisecondsSinceEpoch(x.data).month, 1).compareTo(DateTime(mesCalc.year, mesCalc.monthOfYear, 1)) <
-                  0) &&
-          ((x.ganho
-                  ? DateTime(
-                              LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(x.data))
-                                  .addMonths(x.parcelas)
-                                  .year,
-                              LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(x.data))
-                                  .addMonths(x.parcelas)
-                                  .monthOfYear,
-                              1)
-                          .compareTo(
-                              DateTime(mesCalc.year, mesCalc.monthOfYear, 1)) >
-                      0
-                  : DateTime(
-                              LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(x.data))
-                                  .addMonths(x.parcelas)
-                                  .year,
-                              LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(x.data))
-                                  .addMonths(x.parcelas)
-                                  .monthOfYear,
-                              1)
-                          .compareTo(DateTime(mesCalc.year, mesCalc.monthOfYear, 1)) >=
-                      0) ||
-              x.fixo)) {
-        if (saldo) {
-          x.ganho
-              ? valor += x.valorTotal / (x.parcelas == 0 ? 1 : x.parcelas)
-              : valor -= x.valorTotal / (x.parcelas == 0 ? 1 : x.parcelas);
-        } else {
-          !x.ganho
-              ? valor += x.valorTotal / (x.parcelas == 0 ? 1 : x.parcelas)
-              : null;
-        }
-      }
-    }
-    return valor;
-  }*/
-
-  // Função para verificar se a data do lançamento está dentro do intervalo do mês calculado
-  bool isWithinMonth(LocalDate mesCalc, int data, bool ganho, int parcelas) {
-    DateTime dataLancamento = DateTime.fromMillisecondsSinceEpoch(data);
-    DateTime dataInicial =
-        DateTime(dataLancamento.year, dataLancamento.month, 1);
-    DateTime dataFinal = dataLancamento.add(Duration(days: 30 * parcelas));
-    DateTime dataFinalAjustada = DateTime(dataFinal.year, dataFinal.month, 1);
-
-    DateTime mesCalcInicio = DateTime(mesCalc.year, mesCalc.monthOfYear, 1);
-
-    if (ganho) {
-      return dataInicial.compareTo(mesCalcInicio) <= 0 &&
-          dataFinalAjustada.compareTo(mesCalcInicio) > 0;
-    } else {
-      return dataInicial.compareTo(mesCalcInicio) < 0 &&
-          dataFinalAjustada.compareTo(mesCalcInicio) >= 0;
-    }
-  }
-
 // Função para calcular o valor de cada parcela
   double calcularValorPorParcela(double valorTotal, int parcelas) {
     return (valorTotal / (parcelas == 0 ? 1 : parcelas));
   }
 
 // Função principal para calcular o valor total do mês
-  double somaDoMes(LocalDate mesCalc, {bool saldo = false}) {
+  double somaDoMes(int mesCalc, {bool saldo = false}) {
     double valor = 0.0;
     if (lancamentosBox.isEmpty) return 0.0;
 
-    DateTime mesCalcInicio = DateTime(mesCalc.year, mesCalc.monthOfYear, 1);
-
     for (var lancamento in lancamentosBox.values) {
-      if (isWithinMonth(mesCalc, lancamento.data, lancamento.ganho,
-              lancamento.parcelas) ||
+      if (incluiLancamentoNoMes(
+              lancamento, DateTime.fromMillisecondsSinceEpoch(mesCalc)) ||
           lancamento.fixo) {
         double valorPorParcela =
             calcularValorPorParcela(lancamento.valorTotal, lancamento.parcelas);
@@ -263,28 +118,46 @@ class MainController extends GetxController {
     return valor;
   }
 
-  // Função para verificar se a data está dentro do intervalo desejado
-  bool isDateWithinRange(
-      int data, bool ganho, DateTime dataComparacao, int parcelas) {
-    DateTime dataLancamento = DateTime.fromMillisecondsSinceEpoch(data);
-    DateTime dataInicial =
-        DateTime(dataLancamento.year, dataLancamento.month, 1);
-    DateTime dataFinal = DateTime(
-      LocalDate.dateTime(dataLancamento).addMonths(parcelas).year,
-      LocalDate.dateTime(dataLancamento).addMonths(parcelas).monthOfYear,
-    );
+  LocalDate calcDataInicialCobranca(Lancamento lancamento) {
+    LocalDate dataLancamento = LocalDate.dateTime(
+        DateTime.fromMillisecondsSinceEpoch(lancamento.data));
 
-    if (ganho) {
-      return dataInicial.compareTo(dataComparacao) <= 0 &&
-          dataFinal.compareTo(dataComparacao) > 0;
-    } else {
-      return (dataInicial.compareTo(dataComparacao) < 0 || parcelas == 0) &&
-          dataFinal.compareTo(dataComparacao) >= 0;
+    if (dataLancamento.dayOfMonth >=
+            (int.parse(lancamento.cartao.vencimento!) - 7) &&
+        lancamento.ganho == false &&
+        lancamento.parcelas > 0) {
+      dataLancamento = dataLancamento.addMonths(1);
     }
+    return dataLancamento;
   }
 
-  int parcelaAtual(int data, int parcelas, DateTime dataAtual) {
-    DateTime dataLancamento = DateTime.fromMillisecondsSinceEpoch(data);
+  calcDataFinalCobranca(Lancamento lancamento) {
+    LocalDate dataInicial = calcDataInicialCobranca(lancamento);
+    return dataInicial.addMonths(lancamento.parcelas -
+        (lancamento.parcelas > 0 ? 1 : lancamento.parcelas));
+  }
+
+  incluiLancamentoNoMes(Lancamento lancamento, DateTime dataComparacao) {
+    LocalDate dataSelecionada = LocalDate.dateTime(dataComparacao);
+    LocalDate dataInicial = calcDataInicialCobranca(lancamento);
+    LocalDate dataFinal = calcDataFinalCobranca(lancamento);
+    LocalDate dataSelecionadaComparacao =
+        LocalDate(dataSelecionada.year, dataSelecionada.monthOfYear, 1);
+    LocalDate dataInicialComparacao =
+        LocalDate(dataInicial.year, dataInicial.monthOfYear, 1);
+    LocalDate dataFinalComparacao =
+        LocalDate(dataFinal.year, dataFinal.monthOfYear, 1);
+
+    if (dataInicialComparacao <= dataSelecionadaComparacao &&
+        (dataFinalComparacao >= dataSelecionadaComparacao || lancamento.fixo)) {
+      return true;
+    }
+    return false;
+  }
+
+  int parcelaAtual(Lancamento lancamento, DateTime dataAtual) {
+    DateTime dataLancamento =
+        calcDataInicialCobranca(lancamento).toDateTimeUnspecified();
     int mesesDiferenca = ((dataAtual.year - dataLancamento.year) * 12 +
         dataAtual.month -
         dataLancamento.month);
@@ -296,9 +169,9 @@ class MainController extends GetxController {
 
     int parcelaAtual = mesesDiferenca + 1;
 
-    if (parcelaAtual > parcelas) {
+    if (parcelaAtual > lancamento.parcelas) {
       // A data atual é depois da última parcela
-      return parcelas;
+      return lancamento.parcelas;
     }
 
     return parcelaAtual;
@@ -312,7 +185,31 @@ class MainController extends GetxController {
       child: ListTile(
         textColor: lancamento.ganho ? Colors.green : null,
         onLongPress: () {
-          onDelete(index);
+          Get.dialog(CupertinoAlertDialog(
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text("Deletar lançamento"),
+                  onPressed: () {
+                    onDelete(index);
+                  },
+                )
+              ],
+              title: Text(lancamento.descricao),
+              content: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                        "Valor Total: ${Formatador.double2real(lancamento.valorTotal)}"),
+                    Text(
+                        "Parcelas: ${lancamento.parcelas}x de ${Formatador.double2real(calcularValorPorParcela(lancamento.valorTotal, lancamento.parcelas))}"),
+                    Text("Cartão: ${lancamento.cartao.name}"),
+                    Text(
+                        "Data do Lançamento: ${Formatador.milis2simpleDateTime(lancamento.data, ano: true)}")
+                  ],
+                ),
+              )));
         },
         dense: true,
         title: Row(
@@ -343,7 +240,7 @@ class MainController extends GetxController {
             lancamento.fixo
                 ? Container()
                 : Text(
-                    "${Formatador.double2real(lancamento.valorTotal / (lancamento.parcelas == 0 ? 1 : lancamento.parcelas))} (${parcelaAtual(lancamento.data, lancamento.parcelas, data)}/${lancamento.parcelas})",
+                    "${Formatador.double2real(lancamento.valorTotal / (lancamento.parcelas == 0 ? 1 : lancamento.parcelas))} (${parcelaAtual(lancamento, data)}/${lancamento.parcelas})",
                   ),
           ],
         ),
@@ -351,24 +248,18 @@ class MainController extends GetxController {
     );
   }
 
-
 // Função principal para gerar a lista de widgets
   Widget historicoWidget({bool filtraMes = false}) {
-    if (lancamentosBox.isEmpty) {
-      return const Text("Sem lançamentos");
-    }
-
     DateTime dataComparacao = dataComparacaoSelecionada.value;
     List<Widget> widgets = [];
 
     for (int i = 0; i < lancamentosBox.length; i++) {
-      var lancamento = lancamentosBox.values.elementAt(i);
-      bool exibirLancamento = !filtraMes ||
-          isDateWithinRange(lancamento.data, lancamento.ganho, dataComparacao,
-              lancamento.parcelas) ||
-          lancamento.fixo;
+      Lancamento lancamento = lancamentosBox.values.elementAt(i);
+      bool exibirLancamento =
+          (!filtraMes || incluiLancamentoNoMes(lancamento, dataComparacao)) &&
+              !lancamento.fixo;
 
-      if (exibirLancamento && (!lancamento.ganho || filtraMes)) {
+      if (exibirLancamento) {
         widgets.add(createLancamentoCard(i, lancamento, (index) {
           lancamentosBox.deleteAt(index);
           atualizaTudo();
@@ -393,6 +284,56 @@ class MainController extends GetxController {
           );
   }
 
+  Sla(BuildContext context) {
+    RxList<Widget> listaWidgets = <Widget>[].obs;
+
+    for (Cartao cartao in cartoesBox.values) {
+      var tcValor = TextEditingController(text: "0");
+      RxDouble valorTotal = 0.0.obs;
+
+      listaWidgets.add(Card(
+        child: CupertinoTextFormFieldRow(
+          style: CupertinoTheme.of(context).textTheme.textStyle,
+          onTap: () {
+            tcValor.selection =
+                TextSelection.collapsed(offset: tcValor.text.length);
+          },
+          prefix: const Text("Valor"),
+          controller: tcValor,
+          textAlign: TextAlign.end,
+          keyboardType: const TextInputType.numberWithOptions(),
+          onChanged: (newValue) {
+            if (newValue.isEmpty) newValue = "0";
+
+            valorTotal.value = double.parse(newValue.removeAllWhitespace
+                .replaceAll(".", "")
+                .replaceAll(",", ".")
+                .replaceAll("R\$", ""));
+            calculaSaldoManual();
+          },
+          inputFormatters: <TextInputFormatter>[
+            CurrencyTextInputFormatter.simpleCurrency(locale: 'pt')
+          ],
+        ),
+      ));
+    }
+    ;
+  }
+
+  calcSaldoDoMesManual(BuildContext context) {
+    RxDouble saldoManual = 0.0.obs;
+
+    Get.dialog(CupertinoAlertDialog(
+      title: Text(
+          "Saldo de ${(DateFormat.MMMM("PT").format(dataComparacaoSelecionada.value).capitalizeFirst)} / ${dataComparacaoSelecionada.value.year}"),
+      content: Column(
+        children: [],
+      ),
+    ));
+  }
+
+  calculaSaldoManual() {}
+
   mesesDisponiveis(BuildContext context) {
     calculaDatas();
 
@@ -408,88 +349,61 @@ class MainController extends GetxController {
     }
 
     return Obx(
-      () => SizedBox(
-        height: 100,
-        child: Stack(
-          children: [
-            ScrollConfiguration(
-              behavior: _ScrollbarBehaviorVertical(),
-              child: Stack(
-                children: [
-                  ScrollablePositionedList.builder(
-                    initialAlignment: 0.2,
-                    initialScrollIndex: indexMesSelecionado.value,
-                    itemScrollController: ItemScrollController(),
-                    scrollOffsetController: ScrollOffsetController(),
-                    itemPositionsListener: ItemPositionsListener.create(),
-                    scrollOffsetListener: ScrollOffsetListener.create(),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: diferencaMeses.value + 1,
-                    itemBuilder: (BuildContext context, int i) {
-                      var dataComparacao = DateTime(mesCalc.addMonths(i).year,
-                          mesCalc.addMonths(i).monthOfYear);
-                      var comparacao =
-                          dataComparacao == dataComparacaoSelecionada.value;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12.0),
-                        child: Card(
-                          elevation: comparacao ? 5 : 0.2,
-                          child: InkWell(
-                            onTap: () {
-                              indexMesSelecionado.value = i;
-                              dataComparacaoSelecionada.value = DateTime(
-                                  mesCalc.addMonths(i).year,
-                                  mesCalc.addMonths(i).monthOfYear);
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: comparacao ? 15.0 : 8),
-                              child: Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "${(DateFormat.MMM("pt").format(mesCalc.addMonths(i).toDateTimeUnspecified())).capitalizeFirst} ${mesCalc.addMonths(i).year}",
-                                      style: TextStyle(
-                                          fontWeight: comparacao
-                                              ? FontWeight.bold
-                                              : null),
-                                    ),
-                                    Text(
-                                      Formatador.double2real(somaDoMes(
-                                          mesCalc.addMonths(i),
-                                          saldo: true)),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
+      () => ScrollConfiguration(
+        behavior: _ScrollbarBehaviorVertical(),
+        child: ScrollablePositionedList.builder(
+          initialAlignment: 0.2,
+          initialScrollIndex: indexMesSelecionado.value,
+          itemScrollController: ItemScrollController(),
+          scrollOffsetController: ScrollOffsetController(),
+          itemPositionsListener: ItemPositionsListener.create(),
+          scrollOffsetListener: ScrollOffsetListener.create(),
+          scrollDirection: Axis.horizontal,
+          itemCount: diferencaMeses.value + 1,
+          itemBuilder: (BuildContext context, int i) {
+            var dataComparacao = DateTime(
+                mesCalc.addMonths(i).year, mesCalc.addMonths(i).monthOfYear);
+            var comparacao = dataComparacao == dataComparacaoSelecionada.value;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Card(
+                elevation: comparacao ? 5 : 0.2,
+                child: InkWell(
+                  onTap: () {
+                    indexMesSelecionado.value = i;
+                    dataComparacaoSelecionada.value = DateTime(
+                        mesCalc.addMonths(i).year,
+                        mesCalc.addMonths(i).monthOfYear);
+                  },
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: comparacao ? 15.0 : 8),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${(DateFormat.MMM("pt").format(mesCalc.addMonths(i).toDateTimeUnspecified())).capitalizeFirst} ${mesCalc.addMonths(i).year}",
+                            style: TextStyle(
+                                fontWeight:
+                                    comparacao ? FontWeight.bold : null),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                  IgnorePointer(
-                    child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.horizontal(
-                              left: Radius.circular(250),
-                              right: Radius.circular(250)),
-                          color: Colors.transparent,
-                          border: Border.symmetric(
-                              vertical: BorderSide(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .inversePrimary,
-                                  width: 45,
-                                  strokeAlign: BorderSide.strokeAlignOutside))),
+                          Text(
+                            Formatador.double2real(somaDoMes(
+                              mesCalc
+                                  .addMonths(i)
+                                  .toDateTimeUnspecified()
+                                  .millisecondsSinceEpoch,
+                            )),
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-                ],
+                  ),
+                ),
               ),
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -515,10 +429,7 @@ class _ScrollbarBehaviorHorizontal extends ScrollBehavior {
     return CupertinoScrollbar(
       controller: details.controller,
       scrollbarOrientation: ScrollbarOrientation.right,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: child,
-      ),
+      child: child,
     );
   }
 }

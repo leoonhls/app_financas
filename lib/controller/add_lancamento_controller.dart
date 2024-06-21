@@ -58,8 +58,6 @@ class AddLancamentoController extends GetxController {
         "Cartão: ${cartaoSelecionado.value.name}\nDescrição: ${tcDescricao.text} em ${Formatador.milis2simpleDateTime(dataSelecionada.value, ano: true)}\nValor Total: ${Formatador.double2real(valorTotal.value)}\nParcelas: ${tcParcelas.text}x",
         duration: const Duration(seconds: 5),
       );
-      Get.offAll(const MainPage());
-      Get.to(const AddLancamento());
     }
   }
 }

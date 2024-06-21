@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:get/get.dart';
 
-
 late Box cartoesBox;
 late Box lancamentosBox;
 late Box lancamentosGanhosBox;
@@ -18,19 +17,21 @@ void main() async {
   Hive.registerAdapter<Cartao>(CartaoAdapter());
   Hive.registerAdapter<Lancamento>(LancamentoAdapter());
 
-
-
   cartoesBox = await Hive.openBox<Cartao>("cartoes");
   lancamentosBox = await Hive.openBox<Lancamento>('lancamentos');
 
+
   if (lancamentosBox.isEmpty) {
     lancamentosBox.add(Lancamento(
-        descricao: "Arraste para excluir",
+        descricao: "Segure para excluir",
         parcelas: 1,
         data: DateTime.now().millisecondsSinceEpoch,
         valorTotal: 100,
-        cartao: Cartao.novo(name: "Teste", tipo: "Teste", vencimento: "teste"), ganho: false, fixo: false));
+        cartao: Cartao.novo(name: "Teste", tipo: "Teste", vencimento: "9"),
+        ganho: false,
+        fixo: false));
   }
+
 
   await cartoesBox.clear();
 
@@ -51,7 +52,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      theme: ThemeData(useMaterial3: true ),
+      theme: ThemeData(useMaterial3: true),
       darkTheme: ThemeData.dark(useMaterial3: true),
       themeMode: ThemeMode.system,
       title: 'Controle de Gastos',

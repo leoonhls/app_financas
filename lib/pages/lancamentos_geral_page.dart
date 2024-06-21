@@ -17,67 +17,67 @@ class LancamentosGeralPage extends GetView<MainController> {
 
   @override
   Widget build(BuildContext context) {
-    controller.calculaLimiteTotalUtilizado();
-    controller.calculaMesAtual();
+    controller.mostraBottomAppbar.value = true;
     return ValueListenableBuilder(
       valueListenable: lancamentosBox.listenable(),
       builder: (BuildContext context, Box<dynamic> value, Widget? child) {
         return Scaffold(
           backgroundColor: Colors.transparent,
-          body: Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          appBar: PreferredSize(
+            preferredSize: const Size(100, 120),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.inversePrimary,
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(20)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Center(
                   child: Card(
-                    child: Obx(
-                      () => ListTile(
-                        title: Text(
-                            "Mês atual (${(DateFormat.MMM("PT").format(DateTime.now())).capitalizeFirst}): ${Formatador.double2real(controller.valorMesAtual.value)}"),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                "Saldo: ${Formatador.double2real(controller.saldoMesAtual.value)}"),
-                            Text(
-                                "Limite total utilizado: ${Formatador.double2real(controller.valorLimiteUtilizado.value)}"),
-                          ],
-                        ),
-                        trailing: InkWell(
-                            onTap: () {
-                              Get.delete<MainController>(force: true);
-                              Get.put(MainController());
-                              Get.to(() => const AddLancamento());
-                            },
-                            child:  const Card(margin: EdgeInsets.all(0), elevation: 10, child: Padding(
+                    child: ListTile(
+                      title: Text(
+                          "Mês atual (${(DateFormat.MMM("PT").format(DateTime.now())).capitalizeFirst}): ${Formatador.double2real(controller.somaDoMes(
+                        DateTime.now().millisecondsSinceEpoch,
+                      ))}"),
+                      subtitle: Text(
+                          "Saldo: ${Formatador.double2real(controller.somaDoMes(DateTime.now().millisecondsSinceEpoch, saldo: true))}"),
+                      trailing: InkWell(
+                        onTap: () {
+                          Get.delete<MainController>(force: true);
+                          Get.put(MainController());
+                          Get.to(() => const AddLancamento());
+                        },
+                        child: const Card(
+                            margin: EdgeInsets.all(0),
+                            elevation: 10,
+                            child: Padding(
                               padding: EdgeInsets.all(8.0),
                               child: Icon(Icons.plus_one),
-                            ))),
+                            )),
                       ),
                     ),
                   ),
                 ),
-                Flexible(
-                  flex: 500,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: ListTile(
-                      title: const Padding(
-                        padding: EdgeInsets.only(bottom: 8.0),
-                        child: Text(
-                          "Histórico",
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(bottom: 50.0),
-                        child: controller.historicoWidget(),
-                      ),
-                    ),
+              ),
+            ),
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Card(
+              child: ListTile(
+                title: const Padding(
+                  padding: EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    "Histórico",
+                    style: TextStyle(fontSize: 18),
                   ),
                 ),
-              ],
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(bottom: 50.0),
+                  child: controller.historicoWidget(),
+                ),
+              ),
             ),
           ),
         );

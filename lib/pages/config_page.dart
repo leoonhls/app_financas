@@ -1,58 +1,24 @@
-import 'package:flutter/cupertino.dart';
+import 'package:app_financas2/controller/config_controller.dart';
+import 'package:app_financas2/controller/main_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class ConfigPage extends StatefulWidget {
+class ConfigPage extends GetView<ConfigController> {
   const ConfigPage({super.key});
 
   @override
-  State<ConfigPage> createState() => _ConfigPageState();
-}
-
-class _ConfigPageState extends State<ConfigPage> {
-  @override
   Widget build(BuildContext context) {
+    Get.find<MainController>().mostraBottomAppbar.value = false;
+    Get.put(ConfigController());
     return Scaffold(
-      appBar: AppBar(),
-      body: Column(
-        children: [
-          TextButton(
-              onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        actions: [
-                          CupertinoDialogAction(
-                            child: const Text("Adicinar"),
-                            onPressed: () async {
-                            },
-                          )
-                        ],
-                        title: const Text("Adicionar Cartão"),
-                        content: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              TextFormField(
-                                keyboardType: TextInputType.name,
-                                decoration: const InputDecoration(
-                                  labelText: "Nome",
-                                ),
-                              ),
-                              TextFormField(
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(
-                                  labelText: "Dia de vencimento",
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    });
-              },
-              child: const Text('Adicionar Cartão.'))
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all( 20.0),
+        child: Column(
+          children: [
+            controller.cartoesCadastrados(),
+            controller.lancamentosFixos()
+          ],
+        ),
       ),
     );
   }
