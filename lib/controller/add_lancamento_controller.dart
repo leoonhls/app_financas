@@ -1,5 +1,3 @@
-import 'package:app_financas2/pages/add_lancamento_page.dart';
-import 'package:app_financas2/pages/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

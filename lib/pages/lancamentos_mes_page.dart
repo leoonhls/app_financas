@@ -1,12 +1,11 @@
 import 'package:app_financas2/Utils/formatador.dart';
 import 'package:app_financas2/controller/main_controller.dart';
 import 'package:app_financas2/main.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:app_financas2/pages/calc_saldo_manual_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:time_machine/time_machine.dart';
 
 class LancamentosMesPage extends GetView<MainController> {
   const LancamentosMesPage({
@@ -42,30 +41,25 @@ class LancamentosMesPage extends GetView<MainController> {
                 child: Card(
                   child: ListTile(
                     onTap: () {
-                      controller.calcSaldoDoMesManual(context);
-
+                      Get.to(const CalcSaldoManualPage());
                     },
                     title: const Text("Calcular saldo:"),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Lançamentos:"),
-                        Text(
-                          Formatador.double2real(controller.somaDoMes(
-                              controller.dataComparacaoSelecionada.value
-                                  .millisecondsSinceEpoch,
-                              saldo: true)),
-                          style: TextStyle(
-                              color: controller
-                                      .somaDoMes(
-                                          controller.dataComparacaoSelecionada
-                                              .value.millisecondsSinceEpoch,
-                                          saldo: true)
-                                      .isNegative
-                                  ? Colors.red
-                                  : Colors.green),
-                        ),
-                      ],
+                    trailing: Obx(
+                      () => Text(
+                        Formatador.double2real(controller.somaDoMes(
+                            controller.dataComparacaoSelecionada.value
+                                .millisecondsSinceEpoch,
+                            saldo: true)),
+                        style: TextStyle(
+                            color: controller
+                                    .somaDoMes(
+                                        controller.dataComparacaoSelecionada
+                                            .value.millisecondsSinceEpoch,
+                                        saldo: true)
+                                    .isNegative
+                                ? Colors.red
+                                : Colors.green),
+                      ),
                     ),
                   ),
                 ),

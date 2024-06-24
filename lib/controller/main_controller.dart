@@ -7,15 +7,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:time_machine/time_machine.dart';
-import 'package:intl/date_symbol_data_local.dart';
+
 import '../objetcs/cartao.dart';
 import '../objetcs/lancamento.dart';
 import '../pages/lancamentos_mes_page.dart';
 
 class MainController extends GetxController {
+  RxDouble valorSaldoManual = 0.0.obs;
   RxInt maisAntiga =
       lancamentosBox.isEmpty ? 1.obs : RxInt(lancamentosBox.values.first.data);
   RxInt maisPraFrente =
@@ -32,21 +34,26 @@ class MainController extends GetxController {
 
   Rx<DateTime> dataComparacaoSelecionada =
       DateTime(DateTime.now().year, DateTime.now().month).obs;
+  late List<TextEditingController> controllers;
 
   @override
   Future<void> onInit() async {
-    super.onInit();
     widgetsCliente.value = [
       const LancamentosGeralPage(),
       const LancamentosMesPage(),
       const ConfigPage(),
     ];
+    controllers = List.generate(cartoesBox.length, (i) {
+      return TextEditingController(
+          text: Formatador.double2real(somaDoMesCartao(
+              dataComparacaoSelecionada.value.millisecondsSinceEpoch,
+              cartoesBox.values.elementAt(i))));
+    });
 
     clienteTela = widgetsCliente[0].obs;
     initializeDateFormatting();
+    super.onInit();
   }
-
-  atualizaTudo() {}
 
   Future<void> clienteMenuTapped(int index) async {
     indiceCliente.value = index;
@@ -115,6 +122,29 @@ class MainController extends GetxController {
         }
       }
     }
+    return valor;
+  }
+
+  double somaDoMesCartao(
+    int mesCalc,
+    Cartao cartao,
+  ) {
+    double valor = 0.0;
+    if (lancamentosBox.isEmpty) return 0.0;
+
+    for (Lancamento lancamento in lancamentosBox.values) {
+      if (incluiLancamentoNoMes(
+              lancamento, DateTime.fromMillisecondsSinceEpoch(mesCalc)) ||
+          lancamento.fixo) {
+        double valorPorParcela =
+            calcularValorPorParcela(lancamento.valorTotal, lancamento.parcelas);
+
+        if (!lancamento.ganho && lancamento.cartao.name == cartao.name) {
+          valor += valorPorParcela;
+        }
+      }
+    }
+    valorSaldoManual.value += valor;
     return valor;
   }
 
@@ -262,7 +292,6 @@ class MainController extends GetxController {
       if (exibirLancamento) {
         widgets.add(createLancamentoCard(i, lancamento, (index) {
           lancamentosBox.deleteAt(index);
-          atualizaTudo();
         }, dataComparacaoSelecionada.value));
       }
     }
@@ -283,56 +312,6 @@ class MainController extends GetxController {
             ),
           );
   }
-
-  Sla(BuildContext context) {
-    RxList<Widget> listaWidgets = <Widget>[].obs;
-
-    for (Cartao cartao in cartoesBox.values) {
-      var tcValor = TextEditingController(text: "0");
-      RxDouble valorTotal = 0.0.obs;
-
-      listaWidgets.add(Card(
-        child: CupertinoTextFormFieldRow(
-          style: CupertinoTheme.of(context).textTheme.textStyle,
-          onTap: () {
-            tcValor.selection =
-                TextSelection.collapsed(offset: tcValor.text.length);
-          },
-          prefix: const Text("Valor"),
-          controller: tcValor,
-          textAlign: TextAlign.end,
-          keyboardType: const TextInputType.numberWithOptions(),
-          onChanged: (newValue) {
-            if (newValue.isEmpty) newValue = "0";
-
-            valorTotal.value = double.parse(newValue.removeAllWhitespace
-                .replaceAll(".", "")
-                .replaceAll(",", ".")
-                .replaceAll("R\$", ""));
-            calculaSaldoManual();
-          },
-          inputFormatters: <TextInputFormatter>[
-            CurrencyTextInputFormatter.simpleCurrency(locale: 'pt')
-          ],
-        ),
-      ));
-    }
-    ;
-  }
-
-  calcSaldoDoMesManual(BuildContext context) {
-    RxDouble saldoManual = 0.0.obs;
-
-    Get.dialog(CupertinoAlertDialog(
-      title: Text(
-          "Saldo de ${(DateFormat.MMMM("PT").format(dataComparacaoSelecionada.value).capitalizeFirst)} / ${dataComparacaoSelecionada.value.year}"),
-      content: Column(
-        children: [],
-      ),
-    ));
-  }
-
-  calculaSaldoManual() {}
 
   mesesDisponiveis(BuildContext context) {
     calculaDatas();
@@ -407,6 +386,69 @@ class MainController extends GetxController {
         ),
       ),
     );
+  }
+
+  saldoMesManual() {
+    valorSaldoManual.value = 0.0;
+    for (TextEditingController textController in controllers) {
+      if (textController.text.isEmpty) textController.text = "0";
+      valorSaldoManual.value -= double.parse(textController
+          .text.removeAllWhitespace
+          .replaceAll(".", "")
+          .replaceAll(",", ".")
+          .replaceAll("R\$", ""));
+    }
+    double valor =
+        calcGanhoMes(dataComparacaoSelecionada.value.millisecondsSinceEpoch);
+    valorSaldoManual.value += valor;
+  }
+
+  double calcGanhoMes(
+    int mesCalc,
+  ) {
+    double valor = 0.0;
+    if (lancamentosBox.isEmpty) return 0.0;
+
+    for (Lancamento lancamento in lancamentosBox.values) {
+      if (incluiLancamentoNoMes(
+              lancamento, DateTime.fromMillisecondsSinceEpoch(mesCalc)) ||
+          lancamento.fixo) {
+        double valorPorParcela =
+            calcularValorPorParcela(lancamento.valorTotal, lancamento.parcelas);
+
+        if (lancamento.ganho) valor += valorPorParcela;
+      }
+    }
+    return valor;
+  }
+
+  createFaturasEditaveis(BuildContext context) {
+    List<Widget> lista = [];
+    int i = 0;
+    for (TextEditingController textController in controllers) {
+      lista.add(CupertinoTextFormFieldRow(
+        style: CupertinoTheme.of(context).textTheme.textStyle,
+        onTap: () {
+          textController.selection =
+              TextSelection.collapsed(offset: textController.text.length);
+        },
+        prefix: Text(cartoesBox.values.elementAt(i).name),
+        controller: textController,
+        textAlign: TextAlign.end,
+        keyboardType: const TextInputType.numberWithOptions(),
+        onChanged: (newValue) {
+          if (newValue.isEmpty) newValue = "0";
+          saldoMesManual();
+        },
+        inputFormatters: <TextInputFormatter>[
+          CurrencyTextInputFormatter.simpleCurrency(
+            locale: 'pt',
+          )
+        ],
+      ));
+      i++;
+    }
+    return lista;
   }
 }
 

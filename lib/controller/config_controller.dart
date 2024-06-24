@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-import '../Utils/formatador.dart';
-
 class ConfigController extends GetxController {
   Widget lancamentosFixos() {
     RxList<Widget> listaWidgets = <Widget>[].obs;
@@ -16,8 +14,11 @@ class ConfigController extends GetxController {
       if (lancamentosBox.values.elementAt(i).fixo) {
         listaWidgets.add(Card(
             elevation: 2,
-            child: Get.find<MainController>().createLancamentoCard(i,
-                lancamentosBox.values.elementAt(i), onDelete, DateTime.now())));
+            child: Get.find<MainController>().createLancamentoCard(
+                i, lancamentosBox.values.elementAt(i), (index) {
+              lancamentosBox.deleteAt(index);
+              Get.back();
+            }, DateTime.now())));
       }
     }
 
