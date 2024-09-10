@@ -1,5 +1,6 @@
 import 'package:app_financas2/Utils/formatador.dart';
 import 'package:app_financas2/main.dart';
+import 'package:app_financas2/pages/add_lancamento_page.dart';
 import 'package:app_financas2/pages/config_page.dart';
 import 'package:app_financas2/pages/lancamentos_geral_page.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
@@ -149,37 +150,33 @@ class MainController extends GetxController {
   }
 
   LocalDate calcDataInicialCobranca(Lancamento lancamento) {
-    LocalDate dataLancamento = LocalDate.dateTime(
-        DateTime.fromMillisecondsSinceEpoch(lancamento.data));
-
-    if (dataLancamento.dayOfMonth >=
-            (int.parse(lancamento.cartao.vencimento!) - 7) &&
-        lancamento.ganho == false &&
-        lancamento.parcelas > 0) {
-      dataLancamento = dataLancamento.addMonths(1);
-    }
-    return dataLancamento;
+    return LocalDate.dateTime(
+            DateTime.fromMillisecondsSinceEpoch(lancamento.data))
+        .addMonths(lancamento.moduloFaturaInclusa);
   }
 
   calcDataFinalCobranca(Lancamento lancamento) {
     LocalDate dataInicial = calcDataInicialCobranca(lancamento);
-    return dataInicial.addMonths(lancamento.parcelas -
-        (lancamento.parcelas > 0 ? 1 : lancamento.parcelas));
+    return dataInicial
+        .addMonths(lancamento.moduloFaturaInclusa)
+        .addMonths(lancamento.parcelas);
   }
 
   incluiLancamentoNoMes(Lancamento lancamento, DateTime dataComparacao) {
     LocalDate dataSelecionada = LocalDate.dateTime(dataComparacao);
-    LocalDate dataInicial = calcDataInicialCobranca(lancamento);
-    LocalDate dataFinal = calcDataFinalCobranca(lancamento);
     LocalDate dataSelecionadaComparacao =
         LocalDate(dataSelecionada.year, dataSelecionada.monthOfYear, 1);
+
+    LocalDate dataInicial = calcDataInicialCobranca(lancamento);
     LocalDate dataInicialComparacao =
         LocalDate(dataInicial.year, dataInicial.monthOfYear, 1);
+
+    LocalDate dataFinal = calcDataFinalCobranca(lancamento);
     LocalDate dataFinalComparacao =
         LocalDate(dataFinal.year, dataFinal.monthOfYear, 1);
 
     if (dataInicialComparacao <= dataSelecionadaComparacao &&
-        (dataFinalComparacao >= dataSelecionadaComparacao || lancamento.fixo)) {
+        (dataFinalComparacao > dataSelecionadaComparacao || lancamento.fixo)) {
       return true;
     }
     return false;
@@ -222,6 +219,15 @@ class MainController extends GetxController {
                   onPressed: () {
                     onDelete(index);
                   },
+                ),
+                CupertinoDialogAction(
+                  child: const Text("Editar lançamento"),
+                  onPressed: () {
+                    Get.to(() => AddLancamento(
+                          editLancamento: lancamento,
+                          indexOfDelete: index,
+                        ));
+                  },
                 )
               ],
               title: Text(lancamento.descricao),
@@ -260,10 +266,21 @@ class MainController extends GetxController {
           children: [
             Row(
               children: [
-                Text(
-                  "Total ${Formatador.double2real(lancamento.valorTotal)}",
-                  style:
-                      TextStyle(color: lancamento.ganho ? Colors.green : null),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (lancamento.cartao.name != null)
+                      Text(
+                        lancamento.cartao.name!,
+                        style: TextStyle(
+                            color: lancamento.ganho ? Colors.green : null),
+                      ),
+                    Text(
+                      "Total ${Formatador.double2real(lancamento.valorTotal)}",
+                      style: TextStyle(
+                          color: lancamento.ganho ? Colors.green : null),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -338,7 +355,7 @@ class MainController extends GetxController {
           itemPositionsListener: ItemPositionsListener.create(),
           scrollOffsetListener: ScrollOffsetListener.create(),
           scrollDirection: Axis.horizontal,
-          itemCount: diferencaMeses.value + 1,
+          itemCount: diferencaMeses.value + 7,
           itemBuilder: (BuildContext context, int i) {
             var dataComparacao = DateTime(
                 mesCalc.addMonths(i).year, mesCalc.addMonths(i).monthOfYear);

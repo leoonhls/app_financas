@@ -14,6 +14,7 @@ class Lancamento {
     required this.cartao,
     required this.ganho,
     required this.fixo,
+    required this.moduloFaturaInclusa,
   });
 
   @HiveField(0)
@@ -37,4 +38,6 @@ class Lancamento {
   @HiveField(6)
   bool fixo;
 
+  @HiveField(7)
+  int moduloFaturaInclusa;
 }

@@ -24,13 +24,14 @@ class LancamentoAdapter extends TypeAdapter<Lancamento> {
       cartao: fields[4] as Cartao,
       ganho: fields[5] as bool,
       fixo: fields[6] as bool,
+      moduloFaturaInclusa: fields[7] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Lancamento obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.descricao)
       ..writeByte(1)
@@ -44,7 +45,9 @@ class LancamentoAdapter extends TypeAdapter<Lancamento> {
       ..writeByte(5)
       ..write(obj.ganho)
       ..writeByte(6)
-      ..write(obj.fixo);
+      ..write(obj.fixo)
+      ..writeByte(7)
+      ..write(obj.moduloFaturaInclusa);
   }
 
   @override

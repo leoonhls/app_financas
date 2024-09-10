@@ -19,19 +19,22 @@ class CartaoAdapter extends TypeAdapter<Cartao> {
     return Cartao()
       ..name = fields[0] as String?
       ..tipo = fields[1] as String?
-      ..vencimento = fields[2] as String?;
+      ..vencimento = fields[2] as String?
+      ..diasFechamento = fields[3] as String?;
   }
 
   @override
   void write(BinaryWriter writer, Cartao obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
       ..write(obj.tipo)
       ..writeByte(2)
-      ..write(obj.vencimento);
+      ..write(obj.vencimento)
+      ..writeByte(3)
+      ..write(obj.diasFechamento);
   }
 
   @override

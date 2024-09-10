@@ -1,25 +1,33 @@
 import 'package:app_financas2/Utils/formatador.dart';
 import 'package:app_financas2/objetcs/lancamento.dart';
+import 'package:choice/choice.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:choice/choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:scroll_wheel_date_picker/scroll_wheel_date_picker.dart';
+import 'package:time_machine/time_machine.dart';
 
 import '../controller/add_lancamento_controller.dart';
 import '../main.dart';
 
 class AddLancamento extends GetView<AddLancamentoController> {
-  const AddLancamento({super.key});
+  final Lancamento? editLancamento;
+  final int? indexOfDelete;
+  const AddLancamento({super.key, this.editLancamento, this.indexOfDelete});
 
   @override
   Widget build(BuildContext context) {
     Get.put(AddLancamentoController());
+    controller.populaEdicaoLancamento(
+      editLancamento,
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Novo Lançamento"),
+        title: Text(controller.titulo.value),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -81,15 +89,56 @@ class AddLancamento extends GetView<AddLancamentoController> {
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    child: ScrollWheelDatePicker(
-                      onSelectedItemChanged: (a) {
-                        controller.dataSelecionada.value =
-                            a.millisecondsSinceEpoch;
-                      },
-                      theme: CurveDatePickerTheme(
-                        overlay: ScrollWheelDatePickerOverlay.highlight,
-                        overAndUnderCenterOpacity: 0.2,
+                    child: Obx(
+                      () => ScrollWheelDatePicker(
+                        initialDate: DateTime.fromMillisecondsSinceEpoch(
+                            controller.dataSelecionada.value),
+                        onSelectedItemChanged: (a) {
+                          controller.dataSelecionada.value =
+                              a.millisecondsSinceEpoch;
+                          controller.atualizaFaturaInicial(a);
+                        },
+                        theme: CurveDatePickerTheme(
+                          overlay: ScrollWheelDatePickerOverlay.highlight,
+                          overAndUnderCenterOpacity: 0.2,
+                        ),
                       ),
+                    ),
+                  ),
+                ),
+                Card(
+                  child: Obx(
+                    () => PromptedChoice<String>.single(
+                      value:
+                          "${(DateFormat.MMM("pt").format(LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(controller.dataSelecionada.value)).addMonths(controller.dataFatura.value).toDateTimeUnspecified())).capitalizeFirst} ${LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(controller.dataSelecionada.value)).addMonths(controller.dataFatura.value).year}",
+                      title: "Fatura Inicial",
+                      dividerBuilder: (value) {
+                        return const Divider(
+                          height: 2,
+                          indent: 40,
+                          endIndent: 40,
+                        );
+                      },
+                      itemCount: 5,
+                      itemBuilder: (state, i) {
+                        return InkWell(
+                          child: Center(
+                            child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: Text(
+                                  "${(DateFormat.MMM("pt").format(LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(controller.dataSelecionada.value)).addMonths(i - 1).toDateTimeUnspecified())).capitalizeFirst} ${LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(controller.dataSelecionada.value)).addMonths(i - 1).year}",
+                                )),
+                          ),
+                          onTap: () {
+                            state.select(
+                              "${(DateFormat.MMM("pt").format(LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(controller.dataSelecionada.value)).addMonths(i - 1).toDateTimeUnspecified())).capitalizeFirst} ${LocalDate.dateTime(DateTime.fromMillisecondsSinceEpoch(controller.dataSelecionada.value)).addMonths(i - 1).year}",
+                            );
+                            controller.dataFatura.value = i - 1;
+                          },
+                        );
+                      },
+                      promptDelegate: ChoicePrompt.delegateBottomSheet(),
                     ),
                   ),
                 ),
@@ -194,6 +243,12 @@ class AddLancamento extends GetView<AddLancamentoController> {
                   child: TextButton(
                     child: const Text("Adicionar"),
                     onPressed: () {
+                      if (indexOfDelete != null) {
+                        lancamentosBox.deleteAt(indexOfDelete!);
+                        Get.back();
+                        Get.back();
+                        Get.back();
+                      }
                       controller.regLancamento();
                     },
                   ),

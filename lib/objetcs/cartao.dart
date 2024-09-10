@@ -13,11 +13,15 @@ class Cartao extends HiveObject {
   @HiveField(2)
   String? vencimento;
 
+  @HiveField(3)
+  String? diasFechamento;
+
   Cartao();
 
   Cartao.novo({
     required this.name,
     required this.tipo,
     required this.vencimento,
+    required this.diasFechamento,
   });
 }

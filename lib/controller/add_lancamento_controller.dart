@@ -7,16 +7,17 @@ import '../objetcs/cartao.dart';
 import '../objetcs/lancamento.dart';
 
 class AddLancamentoController extends GetxController {
+  RxString titulo = "Novo Lançamento".obs;
   RxBool ganho = false.obs;
   RxBool fixo = false.obs;
   RxString valorParcelas = "".obs;
-
   var tcDescricao = TextEditingController(text: "");
   var tcValor = TextEditingController(text: "0");
   RxDouble valorTotal = 0.0.obs;
   var tcParcelas = TextEditingController(text: "0");
   Rx<Cartao> cartaoSelecionado = Cartao().obs;
   RxInt dataSelecionada = DateTime.now().millisecondsSinceEpoch.obs;
+  RxInt dataFatura = 0.obs;
 
   @override
   void onInit() {
@@ -28,14 +29,28 @@ class AddLancamentoController extends GetxController {
     if (tcValor.text.isEmpty) tcValor.text = "0";
     if (tcParcelas.text.isEmpty) tcParcelas.text = "0";
 
-    valorParcelas.value =
-        (valorTotal.value / double.parse(tcParcelas.text)).toString();
     if (tcParcelas.text == "0") {
       valorParcelas.value = valorTotal.value.toString();
+    } else {
+      valorParcelas.value =
+          (valorTotal.value / double.parse(tcParcelas.text)).toString();
     }
   }
 
-  regLancamento() {
+  atualizaFaturaInicial(DateTime a) {
+    if (a.isBefore(DateTime(
+      a.year,
+      a.month,
+      int.parse(cartaoSelecionado.value.vencimento!),
+    ).subtract(
+        Duration(days: int.parse(cartaoSelecionado.value.diasFechamento!))))) {
+      dataFatura.value = 0;
+    } else {
+      dataFatura.value = 1;
+    }
+  }
+
+  regLancamento({int? indexDelete}) {
     if (tcDescricao.text.isEmpty ||
         tcParcelas.text.isEmpty ||
         valorTotal.value.toString() == "0" ||
@@ -43,6 +58,7 @@ class AddLancamentoController extends GetxController {
       Get.snackbar("Erro", "Complete todos os dados de lançamento",
           backgroundColor: Colors.red.withOpacity(0.4));
     } else {
+      lancamentosBox.delete(populaEdicaoLancamento);
       lancamentosBox.add(Lancamento(
           descricao: tcDescricao.text,
           parcelas: int.parse(tcParcelas.text),
@@ -50,12 +66,29 @@ class AddLancamentoController extends GetxController {
           valorTotal: valorTotal.value,
           cartao: cartaoSelecionado.value,
           ganho: ganho.value,
-          fixo: fixo.value));
+          fixo: fixo.value,
+          moduloFaturaInclusa: dataFatura.value));
       Get.snackbar(
         "Registrado",
         "Cartão: ${cartaoSelecionado.value.name}\nDescrição: ${tcDescricao.text} em ${Formatador.milis2simpleDateTime(dataSelecionada.value, ano: true)}\nValor Total: ${Formatador.double2real(valorTotal.value)}\nParcelas: ${tcParcelas.text}x",
         duration: const Duration(seconds: 5),
       );
+    }
+  }
+
+  populaEdicaoLancamento(Lancamento? lancamento) async {
+    if (lancamento != null) {
+      titulo.value = "Editar Lançamento";
+      dataSelecionada.value = lancamento.data;
+      cartaoSelecionado.value = lancamento.cartao;
+      ganho.value = lancamento.ganho;
+      fixo.value = lancamento.fixo;
+      tcDescricao.text = lancamento.descricao;
+      tcValor.text = lancamento.valorTotal.toString();
+      valorTotal.value = lancamento.valorTotal;
+      tcParcelas.text = lancamento.parcelas.toString();
+      calculaValorParcela();
+      dataFatura.value = lancamento.moduloFaturaInclusa;
     }
   }
 }
