@@ -29,33 +29,43 @@ class AddLancamento extends GetView<AddLancamentoController> {
       appBar: AppBar(
         title: Text(controller.titulo.value),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           child: Obx(
             () => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Card(
-                  child: Obx(
-                    () => CheckboxListTile(
-                        title: const Text("Ganho"),
-                        value: controller.ganho.value,
-                        onChanged: (a) {
-                          controller.ganho.value = a!;
-                        }),
-                  ),
-                ),
-                Card(
-                  child: Obx(
-                    () => CheckboxListTile(
-                        title: const Text("Fixo"),
-                        value: controller.fixo.value,
-                        onChanged: (a) {
-                          controller.fixo.value = a!;
-                          controller.valorParcelas.value = "0";
-                          controller.tcParcelas.text = "0";
-                        }),
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Card(
+                        child: Obx(
+                          () => CheckboxListTile(
+                              title: const Text("Ganho"),
+                              value: controller.ganho.value,
+                              onChanged: (a) {
+                                controller.ganho.value = a!;
+                              }),
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      child: Card(
+                        child: Obx(
+                          () => CheckboxListTile(
+                              title: const Text("Fixo"),
+                              value: controller.fixo.value,
+                              onChanged: (a) {
+                                controller.fixo.value = a!;
+                                controller.valorParcelas.value = "0";
+                                controller.tcParcelas.text = "0";
+                              }),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
                 Card(
                   child: PromptedChoice<String>.single(

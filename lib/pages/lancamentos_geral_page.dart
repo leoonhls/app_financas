@@ -1,9 +1,7 @@
 import 'package:app_financas2/Utils/formatador.dart';
 import 'package:app_financas2/controller/main_controller.dart';
 import 'package:app_financas2/main.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -27,7 +25,7 @@ class LancamentosGeralPage extends GetView<MainController> {
             preferredSize: const Size(100, 120),
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.inversePrimary,
+                color: Theme.of(context).colorScheme.background,
                 borderRadius:
                     const BorderRadius.vertical(bottom: Radius.circular(20)),
               ),

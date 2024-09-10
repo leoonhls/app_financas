@@ -44,16 +44,19 @@ class MainController extends GetxController {
       const LancamentosMesPage(),
       const ConfigPage(),
     ];
+
+    clienteTela = widgetsCliente[0].obs;
+    initializeDateFormatting();
+    super.onInit();
+  }
+
+  geraTextControllerSaldoManual() {
     controllers = List.generate(cartoesBox.length, (i) {
       return TextEditingController(
           text: Formatador.double2real(somaDoMesCartao(
               dataComparacaoSelecionada.value.millisecondsSinceEpoch,
               cartoesBox.values.elementAt(i))));
     });
-
-    clienteTela = widgetsCliente[0].obs;
-    initializeDateFormatting();
-    super.onInit();
   }
 
   Future<void> clienteMenuTapped(int index) async {
@@ -157,9 +160,8 @@ class MainController extends GetxController {
 
   calcDataFinalCobranca(Lancamento lancamento) {
     LocalDate dataInicial = calcDataInicialCobranca(lancamento);
-    return dataInicial
-        .addMonths(lancamento.moduloFaturaInclusa)
-        .addMonths(lancamento.parcelas);
+
+    return dataInicial.addMonths(lancamento.parcelas);
   }
 
   incluiLancamentoNoMes(Lancamento lancamento, DateTime dataComparacao) {
@@ -205,8 +207,8 @@ class MainController extends GetxController {
   }
 
 // Função para criar o widget do cartão de lançamento
-  Widget createLancamentoCard(
-      int index, Lancamento lancamento, Function onDelete, DateTime data) {
+  Widget createLancamentoCard(int index, Lancamento lancamento,
+      Function onDelete, DateTime data, bool exibeParcelaAtual) {
     return Card(
       elevation: 2,
       child: ListTile(
@@ -218,11 +220,13 @@ class MainController extends GetxController {
                   child: const Text("Deletar lançamento"),
                   onPressed: () {
                     onDelete(index);
+                    Get.back();
                   },
                 ),
                 CupertinoDialogAction(
                   child: const Text("Editar lançamento"),
                   onPressed: () {
+                    Get.back();
                     Get.to(() => AddLancamento(
                           editLancamento: lancamento,
                           indexOfDelete: index,
@@ -287,7 +291,7 @@ class MainController extends GetxController {
             lancamento.fixo
                 ? Container()
                 : Text(
-                    "${Formatador.double2real(lancamento.valorTotal / (lancamento.parcelas == 0 ? 1 : lancamento.parcelas))} (${parcelaAtual(lancamento, data)}/${lancamento.parcelas})",
+                    "${Formatador.double2real(lancamento.valorTotal / (lancamento.parcelas == 0 ? 1 : lancamento.parcelas))}${exibeParcelaAtual ? " " + parcelaAtual(lancamento, data).toString() + "/" + lancamento.parcelas.toString() : " x" + lancamento.parcelas.toString()}",
                   ),
           ],
         ),
@@ -302,14 +306,14 @@ class MainController extends GetxController {
 
     for (int i = 0; i < lancamentosBox.length; i++) {
       Lancamento lancamento = lancamentosBox.values.elementAt(i);
-      bool exibirLancamento =
-          (!filtraMes || incluiLancamentoNoMes(lancamento, dataComparacao)) &&
-              !lancamento.fixo;
+      bool exibirLancamento = (!filtraMes ||
+          (incluiLancamentoNoMes(lancamento, dataComparacao)) ||
+          lancamento.fixo);
 
       if (exibirLancamento) {
         widgets.add(createLancamentoCard(i, lancamento, (index) {
           lancamentosBox.deleteAt(index);
-        }, dataComparacaoSelecionada.value));
+        }, dataComparacaoSelecionada.value, filtraMes));
       }
     }
 

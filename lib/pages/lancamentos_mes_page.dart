@@ -27,7 +27,7 @@ class LancamentosMesPage extends GetView<MainController> {
                 decoration: BoxDecoration(
                   borderRadius:
                       const BorderRadius.vertical(bottom: Radius.circular(20)),
-                  color: Theme.of(context).colorScheme.inversePrimary,
+                  color: Theme.of(context).colorScheme.background,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),

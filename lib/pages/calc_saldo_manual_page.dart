@@ -10,6 +10,7 @@ class CalcSaldoManualPage extends GetView<MainController> {
 
   @override
   Widget build(BuildContext context) {
+    controller.geraTextControllerSaldoManual();
     controller.saldoMesManual();
     return SafeArea(
       child: Scaffold(

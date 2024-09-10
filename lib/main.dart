@@ -14,7 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Hive.initFlutter();
-  Hive.deleteBoxFromDisk("lancamentos");
+  //Hive.deleteBoxFromDisk("lancamentos");
 
   Hive.registerAdapter<Cartao>(CartaoAdapter());
   Hive.registerAdapter<Lancamento>(LancamentoAdapter());
@@ -66,6 +66,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      theme: ThemeData.dark(useMaterial3: false),
       title: 'Controle de Gastos',
       home: const MainPage(),
       debugShowCheckedModeBanner: false,

@@ -45,15 +45,8 @@ class MainPage extends GetView<MainController> {
           appBar: AppBar(
             scrolledUnderElevation: 0,
             centerTitle: true,
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: const Padding(
-              padding: EdgeInsets.only(top: 17.0),
-              child: Text("Controle de Gastos",
-                  style: TextStyle(
-                      fontFamily: "Proxima Nova",
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 25)),
+            title: Text(
+              "Controle de Gastos",
             ),
           ),
           body: controller.clienteTela(),

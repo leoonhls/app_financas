@@ -6,19 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../pages/add_cartao_page.dart';
+
 class ConfigController extends GetxController {
   Widget lancamentosFixos() {
     RxList<Widget> listaWidgets = <Widget>[].obs;
 
     for (int i = 0; i < lancamentosBox.length; i++) {
       if (lancamentosBox.values.elementAt(i).fixo) {
-        listaWidgets.add(Card(
-            elevation: 2,
-            child: Get.find<MainController>().createLancamentoCard(
-                i, lancamentosBox.values.elementAt(i), (index) {
-              lancamentosBox.deleteAt(index);
-              Get.back();
-            }, DateTime.now())));
+        listaWidgets.add(Get.find<MainController>().createLancamentoCard(
+            i, lancamentosBox.values.elementAt(i), (index) {
+          lancamentosBox.deleteAt(index);
+          Get.back();
+        }, DateTime.now(), false));
       }
     }
 
@@ -63,6 +63,7 @@ class ConfigController extends GetxController {
                     child: const Text("Deletar Cartão"),
                     onPressed: () {
                       cartoesBox.delete(cartao.key);
+                      Get.back();
                     },
                   )
                 ],
@@ -109,7 +110,11 @@ class ConfigController extends GetxController {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Cartões"),
-              InkWell(onTap: () {}, child: const Icon(Icons.add))
+              InkWell(
+                  onTap: () {
+                    Get.to(() => const AddCartaoPage());
+                  },
+                  child: const Icon(Icons.add))
             ],
           ),
           subtitle: ValueListenableBuilder(
