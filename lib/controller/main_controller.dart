@@ -359,7 +359,7 @@ class MainController extends GetxController {
           itemPositionsListener: ItemPositionsListener.create(),
           scrollOffsetListener: ScrollOffsetListener.create(),
           scrollDirection: Axis.horizontal,
-          itemCount: diferencaMeses.value + 7,
+          itemCount: diferencaMeses.value + 2,
           itemBuilder: (BuildContext context, int i) {
             var dataComparacao = DateTime(
                 mesCalc.addMonths(i).year, mesCalc.addMonths(i).monthOfYear);
