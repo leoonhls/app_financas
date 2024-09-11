@@ -39,6 +39,7 @@ dependencies:
   custom_navigation_bar: ^0.8.2
   currency_text_input_formatter: ^2.2.3
   scrollable_positioned_list: ^0.3.8
+  rename: ^3.0.2
 
 
 
