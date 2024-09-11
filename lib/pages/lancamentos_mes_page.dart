@@ -27,7 +27,7 @@ class LancamentosMesPage extends GetView<MainController> {
                 decoration: BoxDecoration(
                   borderRadius:
                       const BorderRadius.vertical(bottom: Radius.circular(20)),
-                  color: Theme.of(context).colorScheme.background,
+                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -73,19 +73,22 @@ class LancamentosMesPage extends GetView<MainController> {
                       child: ListTile(
                         title: Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "${(DateFormat.MMMM("PT").format(controller.dataComparacaoSelecionada.value))} ${controller.dataComparacaoSelecionada.value.year}",
-                              ),
-                              Text(
-                                Formatador.double2real(controller.somaDoMes(
-                                  controller.dataComparacaoSelecionada.value
-                                      .millisecondsSinceEpoch,
-                                )),
-                              ),
-                            ],
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "${(DateFormat.MMMM("PT").format(controller.dataComparacaoSelecionada.value))} ${controller.dataComparacaoSelecionada.value.year}",
+                                ),
+                                Text(
+                                  Formatador.double2real(controller.somaDoMes(
+                                    controller.dataComparacaoSelecionada.value
+                                        .millisecondsSinceEpoch,
+                                  )),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         subtitle: Padding(

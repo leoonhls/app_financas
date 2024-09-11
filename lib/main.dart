@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      theme: ThemeData.dark(useMaterial3: false),
+      theme: ThemeData.dark(useMaterial3: true),
       title: 'Controle de Gastos',
       home: const MainPage(),
       debugShowCheckedModeBanner: false,

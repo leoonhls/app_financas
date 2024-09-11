@@ -25,12 +25,13 @@ class LancamentosGeralPage extends GetView<MainController> {
             preferredSize: const Size(100, 120),
             child: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.background,
+                color: Theme.of(context).colorScheme.onSecondary,
                 borderRadius:
                     const BorderRadius.vertical(bottom: Radius.circular(20)),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.only(
+                    left: 20.0, right: 20, bottom: 20, top: 5),
                 child: Center(
                   child: Card(
                     child: ListTile(

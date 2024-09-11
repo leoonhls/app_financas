@@ -28,6 +28,7 @@ class AddLancamento extends GetView<AddLancamentoController> {
     return Scaffold(
       appBar: AppBar(
         title: Text(controller.titulo.value),
+        backgroundColor: Theme.of(context).colorScheme.onSecondary,
       ),
       body: SingleChildScrollView(
         child: Padding(

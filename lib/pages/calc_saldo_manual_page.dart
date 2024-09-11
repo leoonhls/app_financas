@@ -17,6 +17,7 @@ class CalcSaldoManualPage extends GetView<MainController> {
         appBar: AppBar(
           title: Text(
               "Saldo de ${(DateFormat.MMMM("PT").format(Get.find<MainController>().dataComparacaoSelecionada.value).capitalizeFirst)} / ${Get.find<MainController>().dataComparacaoSelecionada.value.year}"),
+          backgroundColor: Theme.of(context).colorScheme.onSecondary,
         ),
         body: Padding(
           padding: const EdgeInsets.all(15.0),

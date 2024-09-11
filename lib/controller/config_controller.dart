@@ -24,12 +24,9 @@ class ConfigController extends GetxController {
 
     return Card(
       child: ListTile(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Lançamentos Fixos"),
-              InkWell(onTap: () {}, child: const Icon(Icons.add))
-            ],
+          title: const Padding(
+            padding: EdgeInsets.only(top: 8.0),
+            child: Text("Lançamentos Fixos"),
           ),
           subtitle: ValueListenableBuilder(
             valueListenable: cartoesBox.listenable(),
@@ -106,16 +103,19 @@ class ConfigController extends GetxController {
 
     return Card(
       child: ListTile(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Cartões"),
-              InkWell(
-                  onTap: () {
-                    Get.to(() => const AddCartaoPage());
-                  },
-                  child: const Icon(Icons.add))
-            ],
+          title: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Cartões"),
+                InkWell(
+                    onTap: () {
+                      Get.to(() => const AddCartaoPage());
+                    },
+                    child: const Icon(Icons.add))
+              ],
+            ),
           ),
           subtitle: ValueListenableBuilder(
             valueListenable: cartoesBox.listenable(),

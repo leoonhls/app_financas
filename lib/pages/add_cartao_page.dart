@@ -17,6 +17,7 @@ class AddCartaoPage extends GetView<AddCartaoController> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.onSecondary,
         title: Text(controller.titulo.value),
       ),
       body: Padding(
