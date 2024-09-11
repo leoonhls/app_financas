@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controller/add_cartao_controller.dart';
-import '../main.dart';
 
 class AddCartaoPage extends GetView<AddCartaoController> {
   final Lancamento? editLancamento;
@@ -21,59 +20,54 @@ class AddCartaoPage extends GetView<AddCartaoController> {
         title: Text(controller.titulo.value),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Card(
-                child: CupertinoTextFormFieldRow(
-                  style: CupertinoTheme.of(context).textTheme.textStyle,
-                  prefix: const Text("Descrição"),
-                  controller: controller.tcDescricao,
-                  textAlign: TextAlign.end,
-                ),
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Card(
+              child: CupertinoTextFormFieldRow(
+                maxLength: 25,
+                style: CupertinoTheme.of(context).textTheme.textStyle,
+                prefix: const Text("Descrição"),
+                controller: controller.tcDescricao,
+                textAlign: TextAlign.end,
               ),
-              Card(
-                child: CupertinoTextFormFieldRow(
-                  style: CupertinoTheme.of(context).textTheme.textStyle,
-                  prefix: const Text("Data de Vencimento"),
-                  controller: controller.tcVencimento,
-                  textAlign: TextAlign.end,
-                  keyboardType: TextInputType.number,
-                  onChanged: (newValue) {
-                    if (newValue.isEmpty) newValue = "0";
+            ),
+            Card(
+              child: CupertinoTextFormFieldRow(
+                maxLength: 2,
+                style: CupertinoTheme.of(context).textTheme.textStyle,
+                prefix: const Text("Data de Vencimento"),
+                controller: controller.tcVencimento,
+                textAlign: TextAlign.end,
+                keyboardType: TextInputType.number,
+                onChanged: (newValue) {
+                  if (newValue.isEmpty) newValue = "0";
 
-                    newValue = newValue.removeAllWhitespace
-                        .replaceAll(".", "")
-                        .replaceAll(",", "");
-                  },
-                ),
+                  newValue = newValue.removeAllWhitespace
+                      .replaceAll(".", "")
+                      .replaceAll(",", "");
+                },
               ),
-              Card(
-                child: CupertinoTextFormFieldRow(
-                  style: CupertinoTheme.of(context).textTheme.textStyle,
-                  prefix: const Text("Dias para Fechamento"),
-                  controller: controller.tcDiasFechamento,
-                  textAlign: TextAlign.end,
-                  keyboardType: TextInputType.number,
-                ),
+            ),
+            Card(
+              child: CupertinoTextFormFieldRow(
+                maxLength: 2,
+                style: CupertinoTheme.of(context).textTheme.textStyle,
+                prefix: const Text("Dias para Fechamento"),
+                controller: controller.tcDiasFechamento,
+                textAlign: TextAlign.end,
+                keyboardType: TextInputType.number,
               ),
-              Card(
-                child: TextButton(
-                  child: const Text("Adicionar"),
-                  onPressed: () {
-                    if (indexOfDelete != null) {
-                      lancamentosBox.deleteAt(indexOfDelete!);
-                      Get.back();
-                      Get.back();
-                      Get.back();
-                    }
-                    controller.regCartao();
-                  },
-                ),
-              )
-            ],
-          ),
+            ),
+            Card(
+              child: TextButton(
+                child: const Text("Adicionar"),
+                onPressed: () {
+                  controller.regCartao(indexDelete: indexOfDelete);
+                },
+              ),
+            )
+          ],
         ),
       ),
     );

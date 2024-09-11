@@ -11,11 +11,6 @@ class AddCartaoController extends GetxController {
   var tcVencimento = TextEditingController(text: "");
   var tcDiasFechamento = TextEditingController(text: "");
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
-
   regCartao({int? indexDelete}) {
     if (tcDescricao.text.isEmpty ||
         tcVencimento.text.isEmpty ||
@@ -23,6 +18,9 @@ class AddCartaoController extends GetxController {
       Get.snackbar("Erro", "Complete todos os dados de lançamento",
           backgroundColor: Colors.red.withOpacity(0.4));
     } else {
+      if (indexDelete != null) {
+        lancamentosBox.deleteAt(indexDelete);
+      }
       cartoesBox.delete(populaEdicaoLancamento);
       cartoesBox.add(Cartao.novo(
         name: tcDescricao.text,

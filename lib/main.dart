@@ -3,6 +3,7 @@ import 'package:app_financas2/objetcs/cartao.dart';
 import 'package:app_financas2/objetcs/lancamento.dart';
 import 'package:app_financas2/pages/main_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // Import necessário para localizações
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -66,6 +67,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      // Define o local padrão como português do Brasil
+      locale: const Locale('pt', 'BR'),
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+        Locale('pt', 'PT'),
+      ],
+      fallbackLocale: const Locale('pt', 'BR'),
+      // Adiciona os delegados de localização para resolver o erro
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       theme: ThemeData.dark(useMaterial3: true),
       title: 'Controle de Gastos',
       home: const MainPage(),

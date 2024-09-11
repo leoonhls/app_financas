@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:scroll_wheel_date_picker/scroll_wheel_date_picker.dart';
+import 'package:scroll_datetime_picker/scroll_datetime_picker.dart';
 import 'package:time_machine/time_machine.dart';
 
 import '../controller/add_lancamento_controller.dart';
@@ -70,7 +70,8 @@ class AddLancamento extends GetView<AddLancamentoController> {
                 ),
                 Card(
                   child: PromptedChoice<String>.single(
-                    value: controller.cartaoSelecionado.value.name,
+                    value:
+                        controller.cartaoSelecionado.value.name ?? "Selecionar",
                     title: "Cartão",
                     dividerBuilder: (value) {
                       return const Divider(
@@ -98,20 +99,50 @@ class AddLancamento extends GetView<AddLancamentoController> {
                   ),
                 ),
                 Card(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    child: Obx(
-                      () => ScrollWheelDatePicker(
-                        initialDate: DateTime.fromMillisecondsSinceEpoch(
-                            controller.dataSelecionada.value),
-                        onSelectedItemChanged: (a) {
-                          controller.dataSelecionada.value =
-                              a.millisecondsSinceEpoch;
-                          controller.atualizaFaturaInicial(a);
-                        },
-                        theme: CurveDatePickerTheme(
-                          overlay: ScrollWheelDatePickerOverlay.highlight,
-                          overAndUnderCenterOpacity: 0.2,
+                  child: Obx(
+                    () => ListTile(
+                      title: const Text("Data do Lançamento"),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: SizedBox(
+                          height: 50,
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: ScrollDateTimePicker(
+                                  itemExtent: 60,
+                                  infiniteScroll: false,
+                                  dateOption: DateTimePickerOption(
+                                    dateFormat:
+                                        DateFormat('ddMMMMyyyy', 'pt_Br'),
+                                    minDate: DateTime(2022, 6),
+                                    maxDate: DateTime(2025, 6),
+                                    initialDate:
+                                        DateTime.fromMillisecondsSinceEpoch(
+                                            controller.dataSelecionada.value),
+                                  ),
+                                  onChange: (datetime) {
+                                    controller.dataSelecionada.value =
+                                        datetime.millisecondsSinceEpoch;
+                                    controller.atualizaFaturaInicial(datetime);
+                                  },
+                                ),
+                              ),
+                              const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.keyboard_arrow_up,
+                                    size: 15,
+                                  ),
+                                  Icon(
+                                    Icons.keyboard_arrow_down,
+                                    size: 15,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
