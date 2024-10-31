@@ -4,12 +4,14 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../Utils/formatador.dart';
+import '../controller/calc_manual_fatura_controller.dart';
 
-class CalcSaldoManualPage extends GetView<MainController> {
+class CalcSaldoManualPage extends GetView<CalcManualController> {
   const CalcSaldoManualPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    Get.put(CalcManualController());
     controller.geraTextControllerSaldoManual();
     controller.saldoMesManual();
     return SafeArea(
@@ -43,6 +45,14 @@ class CalcSaldoManualPage extends GetView<MainController> {
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 15),
                     ),
+                  ),
+                ),
+                Card(
+                  child: TextButton(
+                    child: const Text("Registrar"),
+                    onPressed: () {
+                      controller.regFaturas();
+                    },
                   ),
                 )
               ],

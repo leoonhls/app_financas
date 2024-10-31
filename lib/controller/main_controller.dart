@@ -269,6 +269,7 @@ class MainController extends GetxController {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,9 +290,15 @@ class MainController extends GetxController {
               ],
             ),
             lancamento.fixo
-                ? Container()
+                ? const Card(
+                    margin: EdgeInsets.symmetric(horizontal: 0.0),
+                    elevation: 10,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text("Fixo"),
+                    ))
                 : Text(
-                    "${Formatador.double2real(lancamento.valorTotal / (lancamento.parcelas == 0 ? 1 : lancamento.parcelas))}${exibeParcelaAtual ? " " + parcelaAtual(lancamento, data).toString() + "/" + lancamento.parcelas.toString() : " x" + lancamento.parcelas.toString()}",
+                    "${Formatador.double2real(lancamento.valorTotal / (lancamento.parcelas == 0 ? 1 : lancamento.parcelas))}${exibeParcelaAtual ? " ${parcelaAtual(lancamento, data)}/${lancamento.parcelas}" : " x${lancamento.parcelas}"}",
                   ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:app_financas2/controller/main_controller.dart';
+import 'package:app_financas2/objetcs/calc_manual_fatura.dart';
 import 'package:app_financas2/objetcs/cartao.dart';
 import 'package:app_financas2/objetcs/lancamento.dart';
 import 'package:app_financas2/pages/main_page.dart';
@@ -10,6 +11,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 late Box cartoesBox;
 late Box lancamentosBox;
 late Box lancamentosGanhosBox;
+late Box calcManualFaturasBox;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,19 +21,22 @@ void main() async {
 
   Hive.registerAdapter<Cartao>(CartaoAdapter());
   Hive.registerAdapter<Lancamento>(LancamentoAdapter());
+  Hive.registerAdapter<CalcManualFatura>(CalcManualFaturaAdapter());
 
   cartoesBox = await Hive.openBox<Cartao>("cartoes");
   lancamentosBox = await Hive.openBox<Lancamento>('lancamentos');
+  calcManualFaturasBox =
+      await Hive.openBox<CalcManualFatura>('calculosFaturas');
 
   if (lancamentosBox.isEmpty) {
     lancamentosBox.add(Lancamento(
-        descricao: "Segure para excluir",
+        descricao: "Segure para opções",
         parcelas: 1,
         data: DateTime.now().millisecondsSinceEpoch,
         valorTotal: 100,
         cartao: Cartao.novo(
-            name: "Teste",
-            tipo: "Teste",
+            name: "Exemplo",
+            tipo: "Exemplo",
             vencimento: "9",
             diasFechamento: "15"),
         ganho: false,
