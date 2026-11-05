@@ -1,16 +1,24 @@
-# app_financas2
+# Card Control
 
-A new Flutter project.
+App Flutter de controle financeiro pessoal focado em cartões de crédito: lançamentos por mês, faturas por cartão e cálculo manual de saldo.
 
-## Getting Started
+## Funcionalidades
 
-This project is a starting point for a Flutter application.
+- Cadastro de cartões
+- Lançamentos (inclusão e edição), com seletor de data em pt-BR
+- Visão mensal e geral dos lançamentos
+- Fatura inicial e cálculo manual de saldo do mês
+- Dados salvos localmente (offline)
 
-A few resources to get you started if this is your first Flutter project:
+## Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Flutter · Dart · GetX (estado e navegação) · Hive (armazenamento local)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Rodando
+
+```bash
+flutter pub get
+flutter run
+```
+
+Para regenerar os adapters do Hive (`*.g.dart`): `dart run build_runner build`.
